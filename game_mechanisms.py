@@ -1,15 +1,29 @@
 import copy
 import initial_vars as var
 
-PAWN_DOUBLES, MOVEMENTS, STARTING_POSITIONS, ERROR_MESSAGE, COLORS, FORMAL = (
+(
+    PAWN_DOUBLES,
+    MOVEMENTS,
+    STARTING_POSITIONS,
+    ERROR_MESSAGE,
+    COLORS,
+    FORMAL,
+    LETTERS,
+    PIECE_TYPES,
+    FORMAL_COLORS,
+    INIT_COLOR,
+) = (
     var.dblMoves,
     var.movements,
     var.startingPositions,
     var.error_messages,
     var.colors,
     var.formals,
+    var.letters,
+    var.piece_types,
+    var.formalColors,
+    var.initial_color,
 )
-LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
 
 # Tuple/index/Bit operations
@@ -175,29 +189,49 @@ def moves_postBlock(piece, boardState, audit, dblMoveIndex):
                         bitIndex(position) - 1 == dblMoveIndex
                     ):
                         if piece == "P":
-                            captures.append((position, indexToTuple(dblMoveIndex + 8)))
+                            captures.append(
+                                (position, indexToTuple(dblMoveIndex + 8), dblMoveIndex)
+                            )
                         if piece == "p":
-                            captures.append((position, indexToTuple(dblMoveIndex - 8)))
+                            captures.append(
+                                (position, indexToTuple(dblMoveIndex - 8), dblMoveIndex)
+                            )
                 else:
                     if onBoard(indexToTuple(bitIndex(position) + 1)):
                         if bitIndex(position) + 1 == dblMoveIndex:
                             if piece == "P":
                                 captures.append(
-                                    (position, indexToTuple(dblMoveIndex + 8))
+                                    (
+                                        position,
+                                        indexToTuple(dblMoveIndex + 8),
+                                        dblMoveIndex,
+                                    )
                                 )
                             if piece == "p":
                                 captures.append(
-                                    (position, indexToTuple(dblMoveIndex - 8))
+                                    (
+                                        position,
+                                        indexToTuple(dblMoveIndex - 8),
+                                        dblMoveIndex,
+                                    )
                                 )
                     elif onBoard(indexToTuple(bitIndex(position) - 1)):
                         if bitIndex(position) - 1 == dblMoveIndex:
                             if piece == "P":
                                 captures.append(
-                                    (position, indexToTuple(dblMoveIndex + 8))
+                                    (
+                                        position,
+                                        indexToTuple(dblMoveIndex + 8),
+                                        dblMoveIndex,
+                                    )
                                 )
                             if piece == "p":
                                 captures.append(
-                                    (position, indexToTuple(dblMoveIndex - 8))
+                                    (
+                                        position,
+                                        indexToTuple(dblMoveIndex - 8),
+                                        dblMoveIndex,
+                                    )
                                 )
             fwd.append(get_newPos(position, forwardSquare))
             if bitIndex(position) in startingPawns:
@@ -287,7 +321,10 @@ def moves_postBlock(piece, boardState, audit, dblMoveIndex):
     for pair in captures:
         if audit:
             print(pair)
-        capture_index.append((bitIndex(pair[0]), bitIndex(pair[1])))
+        if len(pair) == 3:
+            capture_index.append((bitIndex(pair[0]), bitIndex(pair[1]), pair[2]))
+        else:
+            capture_index.append((bitIndex(pair[0]), bitIndex(pair[1])))
     if audit:
         print(legal_index, capture_index)
     return legal_index, capture_index
@@ -316,19 +353,26 @@ def moves_postCheck(piece, boardState, audit, dblMoveIndex):
 def boardAfterMove(piece, move, boardState, audit):
     # move is one of the tuples in lists provided by
     newBoard = copy.deepcopy(boardState)
-    victim = isCaptured(piece, move, newBoard)
-    if audit:
-        print(boardState[piece], move[0])
-    newBoard[piece] = changeBit(newBoard[piece], move[0], False)
-    if audit:
-        print(boardState[piece], move[0])
-    newBoard[piece] = changeBit(newBoard[piece], move[1], True)
-    if audit:
-        print(boardState[piece], move[1])
-    if victim != False:
+    if len(move) == 3:
+        victim = pieceInIndex(move[2], newBoard)
+        newBoard[piece] == changeBit(newBoard[piece], move[0], False)
+        newBoard[piece] == changeBit(newBoard[piece], move[1], True)
+        newBoard[victim] == changeBit(newBoard[victim], move[2], False)
+        pass
+    else:
+        victim = isCaptured(piece, move, newBoard)
         if audit:
-            print(newBoard[victim], move[1])
-        newBoard[victim] = changeBit(newBoard[victim], move[1], False)
+            print(boardState[piece], move[0])
+        newBoard[piece] = changeBit(newBoard[piece], move[0], False)
+        if audit:
+            print(boardState[piece], move[0])
+        newBoard[piece] = changeBit(newBoard[piece], move[1], True)
+        if audit:
+            print(boardState[piece], move[1])
+        if victim != False:
+            if audit:
+                print(newBoard[victim], move[1])
+            newBoard[victim] = changeBit(newBoard[victim], move[1], False)
     return newBoard
 
 
@@ -368,12 +412,8 @@ def all_moves(activeColor, boardState, audit, dblMoveIndex):
 
 
 def affectMove(color, move, boardState, audit, dblMoves, dblIndex):
-    active = setActiveByColor(color, boardState)
     dblMoveIndex = pawnDoubleMove_index(color, boardState, move, dblMoves)
-    moves, captures = (
-        all_moves(color, boardState, audit, dblIndex)[0],
-        all_moves(color, boardState, audit, dblIndex)[1],
-    )
+    moves, captures = all_moves(color, boardState, audit, dblIndex)
     for mv in moves:
         if mv[1] == move:
             board_after_move = boardAfterMove(mv[0], mv[1], boardState, audit)
@@ -455,14 +495,6 @@ def displayBoard(boardState, whiteOnTop):
         print(string)
 
 
-def file_rank_compile(color, filerank_input, boardState, dblMoveIndex, audit):
-    for i in range(2):
-        for move in all_moves(color, boardState, audit, dblMoveIndex)[i]:
-            if filerank_index(filerank_input) == move[1]:
-                return move
-    return None
-
-
 def available_moves_displayed(activeColor, boardState, audit, dblMoveIndex):
     allMoves = all_moves(activeColor, boardState, audit, dblMoveIndex)
     mvs = []
@@ -486,51 +518,6 @@ def alternateColor(color):
         return COLORS[0]
 
 
-def fileRankInput(
-    c,
-    board,
-    r,
-    turnList,
-    audit,
-    dblMoveIndex,
-    moveShow,
-    displayShow,
-    turnShow,
-    whiteOnTop,
-):
-    if moveShow:
-        print(
-            "Available Moves:\n",
-            available_moves_displayed(c, board, audit, dblMoveIndex),
-        )
-        newLine()
-    if displayShow:
-        displayBoard(board, whiteOnTop)
-    if turnShow:
-        (print(gameturn) for gameturn in turnList)
-    inp = input(
-        "M (Make Move) ||  P (Previous Moves) || A (Available Moves) || S (Stop Game)\n\t Action:\n\t "
-    )
-    newLine()
-    if inp == "M":
-        newLine()
-        return input("Make Move: \n\t")
-    elif inp == "P":
-        (print(gameturn) for gameturn in turnList)
-        newLine()
-        return None
-    elif inp == "A":
-        print(
-            "Available Moves:\n",
-            available_moves_displayed(c, board, audit, dblMoveIndex),
-        )
-        newLine()
-        return None
-    elif inp == "S":
-        r = False
-        return None
-
-
 def newLine():
     print("\n - - - - - - - - - - - - - - - - - - - - -\n")
 
@@ -538,86 +525,108 @@ def newLine():
 def gameTurns(prevTurns, turns, color, text):
     sep = "||"
     if color == "w":
-        prevTurns.append((turns.copy(), sep, text, "\n"))
+        prevTurns.append((turns, sep, text, "\n"))
     elif color == "b":
         prevTurns.append(("\t", text, "\n"))
 
 
 def turnIncreaser(c, turns):
-    if c == "w":
-        return
-    return turns + 1
-
-
-def turnBlock(
-    running,
-    turnMoves,
-    turnNumber,
-    c,
-    board,
-    audit,
-    dblMoves,
-    init_dblIndex,
-    whiteOnTop,
-    moveShow,
-    displayShow,
-    turnShow,
-):
-    dblIndex = init_dblIndex
-    input = fileRankInput(
-        c,
-        board,
-        running,
-        turnMoves,
-        audit,
-        init_dblIndex,
-        moveShow,
-        displayShow,
-        turnShow,
-        whiteOnTop,
-    )
-    if input == None:
-        turnBlock(
-            running,
-            turnMoves,
-            turnNumber,
-            c,
-            board,
-            audit,
-            dblMoves,
-            init_dblIndex,
-            whiteOnTop,
-            moveShow,
-            displayShow,
-            turnShow,
-        )
-    move = file_rank_compile(c, input, board, init_dblIndex, audit)
-    if move == None:
-        print(ERROR_MESSAGE["move_unavailable"])
-        turnBlock(
-            running,
-            turnMoves,
-            turnNumber,
-            c,
-            board,
-            audit,
-            dblMoves,
-            init_dblIndex,
-            whiteOnTop,
-            moveShow,
-            displayShow,
-            turnShow,
-        )
+    if c == "b":
+        return turns + 1
     else:
-        board, dblIndex = affectMove(c, move, board, audit, dblMoves, dblIndex)
-        gameTurns(turnMoves, turnNumber, c, input)
-        turnIncreaser(c, turnNumber)
-        c = alternateColor(c)
+        return turns
+
+
+def takeAction(c, board, turnList, audit, dblMoveIndex):
+    inp = input(
+        "M (Make Move) ||  P (Previous Moves) || A (Available Moves) || S (Stop Game)\n\t Action:\n\t "
+    )
+    newLine()
+    if inp == "P":
+        previousMovesPrinted(turnList)
+        newLine()
+        return "non-move"
+    elif inp == "A":
+        availableMovesPrinted(c, board, audit, dblMoveIndex)
+        newLine()
+        return "non-move"
+    elif inp == "M":
+        return "move-ready"
+    elif inp == "S":
+        return "end"
+
+
+def inputMove(color, boardState, dblMoveIndex, audit):
+    inp = input("Move: ")
+    move = file_rank_compile(color, inp, boardState, dblMoveIndex, audit)
+    if move == None:
+        return "err", False
+    else:
+        return move, True
+
+
+def qualifyPieceInput(color, input):
+    if color == "w":
+        if len(input) == 2:
+            return "P", input
+        else:
+            p = input[0].lower()
+            return p, filerank_index((input[0].lower() + input[1]))
+    else:
+        if len(input) == 2:
+            return "p", input
+        else:
+            p = input[0].lower()
+            return input[0], filerank_index((input[0].lower() + input[1]))
+
+
+def previousMovesPrinted(turnMoves):
+    (print(turnmove) for turnmove in turnMoves)
+
+
+def availableMovesPrinted(c, b, audit, dbl):
+    print("Avialable Moves:", available_moves_displayed(c, b, audit, dbl))
+
+
+def file_rank_compile(color, filerank_input, boardState, dblMoveIndex, audit):
+    piece, mv = qualifyPieceInput(filerank_input)
+    if color == "w":
+        p = piece.upper()
+    elif color == "b":
+        p = piece.lower()
+    for i in range(2):
+        if audit:
+            print(f"Checking {all_moves(color, boardState, audit, dblMoveIndex)[i]}")
+        for move in all_moves(color, boardState, audit, dblMoveIndex)[i]:
+            if (mv == move[1][1]) and (move[0] == p):
+                return move
+    return None
+
+
+def turnBlock(c, board, audit, dblMoves, dblIndex, move):
+    board, dblIndex = affectMove(c, move, board, audit, dblMoves, dblIndex)
+    if isMate(alternateColor(c), board, audit, dblIndex) == "checkmate":
+        result = "checkmate"
+    elif isMate(alternateColor(c), board, audit, dblIndex) == "checkmate":
+        result = "stalemate"
+    else:
+        result = None
+    return board, dblIndex, result
+
+
+def isMate(c, board, audit, dblIndex):
+    if (len(all_moves(c, board, audit, dblIndex)[0]) == 0) and (
+        len(all_moves(c, board, audit, dblIndex)[1]) == 0
+    ):
+        if isCheck(setActiveByColor("c", board), board, dblIndex):
+            return "checkmate"
+        else:
+            return "stalemate"
 
 
 # notation comprehension
 def filerank_index(filerank):
-    return bitIndex((int(filerank[1]) - 1, ord(filerank[0]) - ord("a")))
+    return int(bitIndex((int(filerank[1]) - 1, ord(filerank[0]) - ord("a"))))
 
 
 def index_filerank(index):
@@ -627,8 +636,8 @@ def index_filerank(index):
 
 def gameConfig():
     inp = input("Show available Moves by default? Y/N\n")
-    disp = input("Display Board after move? Y/N\n")
-    prev = input("(Not recommended) Display Previous Moves By Default? Y/N\n")
+    disp = input("(Recommended) Display Board after move? Y/N\n")
+    prev = input("Display Previous Moves By Default? Y/N\n")
     if (inp == "y") or (inp == "Y"):
         defaultMoveShow = True
     else:
@@ -642,3 +651,68 @@ def gameConfig():
     else:
         defaultTurnsShow = False
     return defaultMoveShow, defaultDispShow, defaultTurnsShow
+
+
+def gameLoop():
+    Running = True
+    turnMoves, turnNumber, c, board, dblMoveIndex, whiteOnTop, audit = (
+        [],
+        1,
+        "w",
+        bit_initialise(STARTING_POSITIONS),
+        None,
+        False,
+        False,
+    )
+    config = gameConfig()
+    while Running:
+        print(f"Turn {turnNumber} | {FORMAL_COLORS[c]} to move")
+        if config[0]:
+            availableMovesPrinted(c, board, audit, dblMoveIndex)
+        if config[1]:
+            displayBoard(board, whiteOnTop)
+        if config[2]:
+            previousMovesPrinted(turnMoves)
+        moveReady = False
+        while not moveReady:
+            act = takeAction(c, board, turnMoves, audit, dblMoveIndex)
+            if act == "end":
+                Running, Break = False, True
+                break
+            elif act == "move-ready":
+                moveReady = True
+                break
+        if moveReady:
+            moveAllowed = False
+            while not moveAllowed:
+                move = inputMove(c, board, dblMoveIndex, audit)
+                if move[1] == False:
+                    print(ERROR_MESSAGE["move_unavailable"])
+                elif move[1] == True:
+                    moveAllowed = True
+        if not Running:
+            break
+        board, dblMoveIndex, result = turnBlock(
+            c, board, audit, PAWN_DOUBLES, dblMoveIndex, move[0][1]
+        )
+        if result == "checkmate" or result == "stalemate":
+            Running = False
+            break
+        elif result == "stalemate":
+            Running = False
+            break
+        else:
+            # gameTurns(turnMoves, turnNumber, c, move[0])
+            # print(turnMoves[-1])
+            turnNumber = turnIncreaser(c, turnNumber)
+            c = alternateColor(c)
+    if Break:
+        print("Game Ended (stopped)")
+    else:
+        print(f"Game Over. {c} wins by Checkmate!")
+    playagain = input("Would you like to play again? Y/N \n")
+    if playagain == "Y":
+        gameLoop()
+    else:
+        print("See You Next Time!")
+        return

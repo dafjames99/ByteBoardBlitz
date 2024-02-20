@@ -19,7 +19,7 @@ turnMoves, turnNumber, c, board, dblMoveIndex, whiteOnTop, audit = (
     gm.bit_initialise(STARTING_POSITIONS),
     None,
     False,
-    False,
+    True,
 )
 while Running:
     # config = gm.gameConfig()

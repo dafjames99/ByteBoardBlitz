@@ -2,8 +2,10 @@ error_messages = {"move_unavailable": "Error: This is not a legal movement. Try 
 
 initial_color = []
 
+letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+formalColors = {'w':'white','b': 'black'}
 colors = ["w", "b"]
-'ccc'
+
 startingPositions = {
     "P": [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7)],
     "N": [(0, 1), (0, 6)],
@@ -143,5 +145,5 @@ formals = {
     "r": "Rook",
     "b": "Bishop",
     "k": "King",
-    "q": "Queen"
+    "q": "Queen",
 }
