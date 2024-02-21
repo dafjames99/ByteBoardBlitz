@@ -3,7 +3,7 @@ error_messages = {"move_unavailable": "Error: This is not a legal movement. Try 
 initial_color = []
 
 letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
-formalColors = {'w':'white','b': 'black'}
+formalColors = {'w':'White','b': 'Black'}
 colors = ["w", "b"]
 
 startingPositions = {
@@ -20,7 +20,32 @@ startingPositions = {
     "k": [(7, 4)],
     "q": [(7, 3)],
 }
-
+startingSideIndices = {
+        'w': {
+            'q': {
+                'R': 0,  
+                'N': 1,
+                'B': 2 
+            },
+            'k': {
+                'R': 7,  
+                'N': 6,
+                'B': 5 
+            }
+        },
+        'b': {
+            'q': {
+                'r': 56,  
+                'n': 57,
+                'b': 58 
+            },
+            'k': {
+                'r': 63,  
+                'n': 62,
+                'b': 61 
+            }
+        }
+    }
 movements = {
     "P": [[(1, 0)], [(1, -1), (1, 1)]],
     "N": [
