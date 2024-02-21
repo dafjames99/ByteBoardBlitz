@@ -1,3 +1,4 @@
+import random
 import copy
 import initial_vars as var
 
@@ -716,3 +717,13 @@ def gameLoop():
     else:
         print("See You Next Time!")
         return
+
+
+def randomChoice(moves):
+    i = random.randint(0, len(moves) - 1)
+    return moves[i]
+
+def machineTurn(selectionMethod, color, board, audit, dblIndex):
+    # selectionMethod = randomChoice
+    moves = all_moves(color, board, audit, dblIndex)[0] + all_moves(color, board, audit, dblIndex)[1]
+    return selectionMethod(moves)
