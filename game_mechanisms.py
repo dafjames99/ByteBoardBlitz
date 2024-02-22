@@ -399,7 +399,9 @@ def pawnDoubleMove_index(color, board, move, dblMoves):
     return None
 
 
-def all_moves(activeColor, boardState, audit, dblMoveIndex):
+def all_moves(
+    activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+):
     nonCaptures, captures = [], []
     for piece in setActiveByColor(activeColor, boardState):
         if audit:
@@ -411,12 +413,34 @@ def all_moves(activeColor, boardState, audit, dblMoveIndex):
             nonCaptures.append((piece, a))
         for b in moves[1]:
             captures.append((piece, b))
+    if (
+        castlePossible(
+            activeColor, kingMoved, rookQSide, rookKSide, boardState, dblMoveIndex
+        )[1]
+        == True
+    ):
+        nonCaptures.append("O-O-O")
+    if (
+        castlePossible(
+            activeColor, kingMoved, rookQSide, rookKSide, boardState, dblMoveIndex
+        )[0]
+        == True
+    ):
+        nonCaptures.append("O-O")
     return nonCaptures, captures
 
 
-def affectMove(color, move, boardState, audit, dblMoves, dblIndex):
+def affectMove(
+    color, move, boardState, audit, dblMoves, dblIndex, kingMoved, rookQSide, rookKSide
+):
+    if move == "O-O":
+        return castleMove(boardState, color, "k", dblMoveIndex), None
+    elif move == "O-O-O":
+        return castleMove(boardState, color, "q", dblMoveIndex), None
     dblMoveIndex = pawnDoubleMove_index(color, boardState, move, dblMoves)
-    moves, captures = all_moves(color, boardState, audit, dblIndex)
+    moves, captures = all_moves(
+        color, boardState, audit, dblIndex, kingMoved, rookQSide, rookKSide
+    )
     for mv in moves:
         if mv[1] == move:
             board_after_move = boardAfterMove(mv[0], mv[1], boardState, audit)
@@ -498,8 +522,8 @@ def displayBoard(boardState, whiteOnTop):
         print(string)
 
 
-def available_moves_displayed(activeColor, boardState, audit, dblMoveIndex):
-    allMoves = all_moves(activeColor, boardState, audit, dblMoveIndex)
+def available_moves_displayed(activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide):
+    allMoves = all_moves(activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide)
     mvs = []
     for i in range(2):
         for move in allMoves[i]:
@@ -559,11 +583,17 @@ def takeAction(c, board, turnList, audit, dblMoveIndex):
         return "end"
 
 
-def inputMove(color, boardState, dblMoveIndex, audit):
+def inputMove(color, boardState, dblMoveIndex, audit, kingMoved, rookQSide, rookKSide):
     inp = input("Move (BACK for Move options): ")
+    if len(inp) == 1:
+        return 'err'
     if inp == "BACK":
         return "back"
-    move = file_rank_compile(color, inp, boardState, dblMoveIndex, audit)
+    elif (inp == "O-O-O") or (inp == "O-O"):
+        return inp
+    move = file_rank_compile(
+        color, inp, boardState, dblMoveIndex, audit, kingMoved, rookQSide, rookKSide
+    )
     if move == None:
         return "err", False
     else:
@@ -593,7 +623,16 @@ def availableMovesPrinted(c, b, audit, dbl):
     print("Avialable Moves:", available_moves_displayed(c, b, audit, dbl))
 
 
-def file_rank_compile(color, filerank_input, boardState, dblMoveIndex, audit):
+def file_rank_compile(
+    color,
+    filerank_input,
+    boardState,
+    dblMoveIndex,
+    audit,
+    kingMoved,
+    rookQSide,
+    rookKSide,
+):
     piece, mv = qualifyPieceInput(color, filerank_input)
     if color == "w":
         p = piece.upper()
@@ -602,26 +641,46 @@ def file_rank_compile(color, filerank_input, boardState, dblMoveIndex, audit):
     for i in range(2):
         if audit:
             print(f"Checking {all_moves(color, boardState, audit, dblMoveIndex)[i]}")
-        for move in all_moves(color, boardState, audit, dblMoveIndex)[i]:
+        for move in all_moves(
+            color, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+        )[i]:
             if (mv == move[1][1]) and (move[0] == p):
                 return move
     return None
 
 
-def turnBlock(c, board, audit, dblMoves, dblIndex, move):
-    board, dblIndex = affectMove(c, move, board, audit, dblMoves, dblIndex)
-    if isMate(alternateColor(c), board, audit, dblIndex) == "checkmate":
+def turnBlock(
+    c, board, audit, dblMoves, dblIndex, move, kingMoved, rookQSide, rookKSide
+):
+    board, dblIndex = affectMove(
+        c, move, board, audit, dblMoves, dblIndex, kingMoved, rookQSide, rookKSide
+    )
+    if (
+        isMate(
+            alternateColor(c), board, audit, dblIndex, kingMoved, rookQSide, rookKSide
+        )
+        == "checkmate"
+    ):
         result = "checkmate"
-    elif isMate(alternateColor(c), board, audit, dblIndex) == "checkmate":
+    elif (
+        isMate(
+            alternateColor(c), board, audit, dblIndex, kingMoved, rookQSide, rookKSide
+        )
+        == "checkmate"
+    ):
         result = "stalemate"
     else:
         result = None
     return board, dblIndex, result
 
 
-def isMate(c, board, audit, dblIndex):
-    if (len(all_moves(c, board, audit, dblIndex)[0]) == 0) and (
-        len(all_moves(c, board, audit, dblIndex)[1]) == 0
+def isMate(c, board, audit, dblIndex, kingHasMoved, rookQSide, rookKSide):
+    if (
+        len(all_moves(c, board, audit, dblIndex, kingHasMoved, rookQSide, rookKSide)[0])
+        == 0
+    ) and (
+        len(all_moves(c, board, audit, dblIndex, kingHasMoved, rookQSide, rookKSide)[1])
+        == 0
     ):
         if isCheck(setActiveByColor(c, board), board, dblIndex):
             return "checkmate"
@@ -688,8 +747,9 @@ def gameLoop():
     config = gameConfig()
     while Running:
         print(f"Turn {turnNumber} | {FORMAL_COLORS[c]} to move")
+        castle = None
         if config[0]:
-            availableMovesPrinted(c, board, audit, dblMoveIndex)
+            availableMovesPrinted(c, board, audit, dblMoveIndex, kingHasMoved, rookQSide, rookKSide)
         if config[1]:
             displayBoard(board, whiteOnTop)
         if config[2]:
@@ -706,10 +766,16 @@ def gameLoop():
         if moveReady:
             moveAllowed = False
             while not moveAllowed:
-                move = inputMove(c, board, dblMoveIndex, audit)
+                move = inputMove(
+                    c, board, dblMoveIndex, audit, kingHasMoved, rookQSide, rookKSide
+                )
                 if move == "back":
                     moveAllowed = True
                     break
+                if move == "O-O":
+                    castle = castleMove(board, c, "k", dblMoveIndex)
+                elif move == "O-O-O":
+                    castle = castleMove(board, c, "q", dblMoveIndex)
                 if move[1] == False:
                     print(ERROR_MESSAGE["move_unavailable"])
                 elif move[1] == True:
@@ -717,9 +783,30 @@ def gameLoop():
         if move != "back":
             if not Running:
                 break
-            board, dblMoveIndex, result = turnBlock(
-                c, board, audit, PAWN_DOUBLES, dblMoveIndex, move[0][1]
-            )
+            if castle != None:
+                board, dblMoveIndex, result = turnBlock(
+                    c,
+                    board,
+                    audit,
+                    PAWN_DOUBLES,
+                    dblMoveIndex,
+                    move,
+                    kingHasMoved,
+                    rookQSide,
+                    rookKSide,
+                )
+            else:
+                board, dblMoveIndex, result = turnBlock(
+                    c,
+                    board,
+                    audit,
+                    PAWN_DOUBLES,
+                    dblMoveIndex,
+                    move[0][1],
+                    kingHasMoved,
+                    rookQSide,
+                    rookKSide,
+                )
             if result == "checkmate" or result == "stalemate":
                 Running = False
                 break
@@ -769,17 +856,20 @@ def machineTurn(selectionMethod, color, board, audit, dblIndex):
 def pieceHasMoved(piece, c, boardState, side=None):
     startBoard = bit_initialise(STARTING_POSITIONS)
     if c == "w":
-        p = piece.upper()
+        piece = piece.upper()
     if side != None:
         if boardSide(boardState, piece, side) != boardSide(startBoard, piece, side):
             return True
-    if boardState[p] != bit_initialise(STARTING_POSITIONS)[p]:
+    if boardState[piece] != bit_initialise(STARTING_POSITIONS)[piece]:
         return True
     return False
 
 
 #  #  # IN PROGRESS # # #
-def castlePossible(c, kingMoved, rookQSide, rookKSide, boardState):
+def castlePossible(c, kingMoved, rookQSide, rookKSide, boardState, dblMoveIndex):
+    qside, kside = True, True
+    if isCheck(setActiveByColor(c, boardState), boardState, dblMoveIndex):
+        return False
     if c == "w":
         k, r = "K", "R"
     else:
@@ -788,21 +878,82 @@ def castlePossible(c, kingMoved, rookQSide, rookKSide, boardState):
     rK = boardState["R"][getIndexBySide(r, c, "k")]
 
     if kingMoved[c]:
-        return False
-    elif rookQSide[c] and rookKSide[c]:
-        return False
+        qside, kside = False, False
+    if rookQSide[c]:
+        qside = False
+    if rookKSide[c]:
+        kside = False
     else:
-        if pathClear(boardState, k, rQ):
-            pass
-        if pathClear(boardState, k, rK):
-            pass
+        if not castlePathClear(c, boardState, k, "q", dblMoveIndex):
+            qside = False
+        if not castlePathClear(c, boardState, k, "k", dblMoveIndex):
+            kside = False
+    return kside, qside
+
+
+def castleMove(b, c, side, dblMoveIndex):
+    board = b.copy()
+    if c == "w":
+        board["K"] = 64 * "0"
+        if side == "q":
+            board["K"] = changeBit(board["K"], 2, True)
+            board["R"] = changeBit(board["R"], 0, False)
+            board["R"] = changeBit(board["R"], 3, True)
+        elif side == "k":
+            board["K"] = changeBit(board["K"], 6, True)
+            board["R"] = changeBit(board["R"], 7, False)
+            board["R"] = changeBit(board["R"], 5, True)
+    elif c == "b":
+        board["k"] = 64 * "0"
+        if side == "q":
+            board["k"] = changeBit(board["k"], 58, True)
+            board["r"] = changeBit(board["r"], 56, False)
+            board["r"] = changeBit(board["r"], 59, True)
+        elif side == "k":
+            board["k"] = changeBit(board["k"], 62, True)
+            board["r"] = changeBit(board["r"], 63, False)
+            board["r"] = changeBit(board["r"], 61, True)
+    if isCheck(setActiveByColor(c, board), board, dblMoveIndex):
+        return None
+    else:
+        return board
 
 
 #  #  # IN PROGRESS # # #
+def checkDummyKing(c, board, index, dblMoveIndex):
+    if c == "w":
+        k = "K"
+    elif c == "b":
+        k = "k"
+    boardCheck = board.copy()
+    boardCheck[k] = 64 * "0"
+    boardCheck[k] = changeBit(boardCheck[k], index, True)
+    if isCheck(setActiveByColor(c, boardCheck), boardCheck, dblMoveIndex):
+        return False
+    return True
 
 
-def pathClear(board, piece1, piece2):
-    pass
+def castlePathClear(c, board, piece, rookSide, dblMoveIndex):
+    if c == "w":
+        piece = piece.upper()
+        kingPos = 4
+    else:
+        kingPos = 60
+    if rookSide == "q":
+        for i in range(getIndexBySide("r", c, "q") + 1, kingPos):
+            if pieceInIndex(i, board) == None:
+                if checkDummyKing(c, board, i, dblMoveIndex):
+                    return False
+            else:
+                return False
+    if rookSide == "k":
+        for i in range(kingPos + 1, getIndexBySide("r", c, "k")):
+            if pieceInIndex(i, board) == None:
+                if checkDummyKing(c, board, i, dblMoveIndex):
+                    return False
+            else:
+                return False
+    return True
 
 
 def getIndexBySide(piece, color, side):
@@ -814,7 +965,11 @@ def getIndexBySide(piece, color, side):
 def boardSide(board, piece, side):
     string = ""
     if side == "q":
-        string += (board[piece][i] for i in range(64) if (i % 8 == 0))
+        for i in range(64):
+            if i % 8 == 0:
+                string += board[piece][i]
     elif side == "k":
-        string += (board[piece][i - 1] for i in range(1, 65) if (i % 8 == 0))
+        for i in range(1, 65):
+            if i % 8 == 0:
+                string += board[piece][i - 1]
     return string
