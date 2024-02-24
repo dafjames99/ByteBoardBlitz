@@ -211,3 +211,23 @@ indexMoves = {
  }
 
 white_pieces, black_pieces = ['K', 'Q', 'P', 'N', 'B', 'R'], ['k','q','p','n','b','r']
+
+
+coloredPieces = {
+    'w': {
+        'Pawn': 'P',
+        'Queen': 'Q',
+        'King': 'K',
+        'Bishop': 'B',
+        'Knight': 'N',
+        'Rook': 'R'
+        },
+    'b': {
+        'Pawn': 'p',
+        'Queen': 'q',
+        'King': 'k',
+        'Bishop': 'b',
+        'Knight': 'n',
+        'Rook': 'r'
+        }
+}

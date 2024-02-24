@@ -14,6 +14,8 @@ import initial_vars as var
     FORMAL_COLORS,
     INIT_COLOR,
     QSIDE_KSIDE,
+    START_BOARD,
+    INDEX_MOVES
 ) = (
     var.dblMoves,
     var.movements,
@@ -26,20 +28,46 @@ import initial_vars as var
     var.formalColors,
     var.initial_color,
     var.startingSideIndices,
+    var.starting_bits,
+    var.indexMoves
 )
 
+def bit_init():
+    return START_BOARD.copy()
+
+# def bit_initialise(positions):
+#     board = {}
+#     for item, posns in positions.items():
+#         binary = "0" * 64
+#         for position in posns:
+#             binary = changeBit(binary, bitIndex(position), True)
+#         board[item] = binary
+#     return board
 
 # Tuple/index/Bit operations
+
 def bitIndex(tuple):
     index = tuple[0] * 8 + tuple[1]
     return index
-
 
 def indexToTuple(index):
     row = index // 8
     col = index % 8
     return row, col
 
+# def indexToPos(bin):
+#     tups = []
+#     for i in range(64):
+#         if bin[i] == "1":
+#             tups.append(indexToTuple(i))
+#     return tups
+
+def indexToPos(bin):
+    indices = []
+    for i in range(64):
+        if bin[i] == '1':
+            indices.append(i)
+    return indices
 
 def changeBit(b, i, bool):
     if bool == True:
@@ -49,23 +77,9 @@ def changeBit(b, i, bool):
     return b
 
 
-def indexToPos(bin):
-    tups = []
-    for i in range(64):
-        if bin[i] == "1":
-            tups.append(indexToTuple(i))
-    return tups
 
 
 # create & comprehend board
-def bit_initialise(positions):
-    board = {}
-    for item, posns in positions.items():
-        binary = "0" * 64
-        for position in posns:
-            binary = changeBit(binary, bitIndex(position), True)
-        board[item] = binary
-    return board
 
 
 # comprehend coloured boards
@@ -380,7 +394,7 @@ def boardAfterMove(piece, move, boardState, audit):
 
 
 def pawn_starting_double(piece, boardState):
-    starting_board = bit_initialise(STARTING_POSITIONS)[piece]
+    starting_board = START_BOARD[piece]
     current = boardState[piece]
     starting = []
     for i in range(64):
@@ -522,8 +536,12 @@ def displayBoard(boardState, whiteOnTop):
         print(string)
 
 
-def available_moves_displayed(activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide):
-    allMoves = all_moves(activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide)
+def available_moves_displayed(
+    activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+):
+    allMoves = all_moves(
+        activeColor, boardState, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+    )
     mvs = []
     for i in range(2):
         for move in allMoves[i]:
@@ -564,7 +582,9 @@ def turnIncreaser(c, turns):
         return turns
 
 
-def takeAction(c, board, turnList, audit, dblMoveIndex):
+def takeAction(
+    c, board, turnList, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+):
     inp = input(
         "- - - - - GameOptions - - - - - \nM (Make Move) ||  P (Previous Moves) || A (Available Moves) || S (Stop Game)\n\t Action:\n\t "
     )
@@ -574,7 +594,9 @@ def takeAction(c, board, turnList, audit, dblMoveIndex):
         newLine()
         return "non-move"
     elif inp == "A":
-        availableMovesPrinted(c, board, audit, dblMoveIndex)
+        availableMovesPrinted(
+            c, board, audit, dblMoveIndex, kingMoved, rookQSide, rookKSide
+        )
         newLine()
         return "non-move"
     elif inp == "M":
@@ -586,7 +608,7 @@ def takeAction(c, board, turnList, audit, dblMoveIndex):
 def inputMove(color, boardState, dblMoveIndex, audit, kingMoved, rookQSide, rookKSide):
     inp = input("Move (BACK for Move options): ")
     if len(inp) == 1:
-        return 'err'
+        return "err"
     if inp == "BACK":
         return "back"
     elif (inp == "O-O-O") or (inp == "O-O"):
@@ -717,126 +739,6 @@ def gameConfig():
     return defaultMoveShow, defaultDispShow, defaultTurnsShow
 
 
-def gameLoop():
-    Running = True
-    (
-        kingHasMoved,
-        rookQSide,
-        rookKSide,
-        turnMoves,
-        turnNumber,
-        c,
-        board,
-        dblMoveIndex,
-        whiteOnTop,
-        audit,
-        Break,
-    ) = (
-        {"w": False, "b": False},
-        {"w": False, "b": False},
-        {"w": False, "b": False},
-        [],
-        1,
-        "w",
-        bit_initialise(STARTING_POSITIONS),
-        None,
-        False,
-        False,
-        False,
-    )
-    config = gameConfig()
-    while Running:
-        print(f"Turn {turnNumber} | {FORMAL_COLORS[c]} to move")
-        castle = None
-        if config[0]:
-            availableMovesPrinted(c, board, audit, dblMoveIndex, kingHasMoved, rookQSide, rookKSide)
-        if config[1]:
-            displayBoard(board, whiteOnTop)
-        if config[2]:
-            previousMovesPrinted(turnMoves)
-        moveReady = False
-        while not moveReady:
-            act = takeAction(c, board, turnMoves, audit, dblMoveIndex)
-            if act == "end":
-                Running, Break = False, True
-                break
-            elif act == "move-ready":
-                moveReady = True
-                break
-        if moveReady:
-            moveAllowed = False
-            while not moveAllowed:
-                move = inputMove(
-                    c, board, dblMoveIndex, audit, kingHasMoved, rookQSide, rookKSide
-                )
-                if move == "back":
-                    moveAllowed = True
-                    break
-                if move == "O-O":
-                    castle = castleMove(board, c, "k", dblMoveIndex)
-                elif move == "O-O-O":
-                    castle = castleMove(board, c, "q", dblMoveIndex)
-                if move[1] == False:
-                    print(ERROR_MESSAGE["move_unavailable"])
-                elif move[1] == True:
-                    moveAllowed = True
-        if move != "back":
-            if not Running:
-                break
-            if castle != None:
-                board, dblMoveIndex, result = turnBlock(
-                    c,
-                    board,
-                    audit,
-                    PAWN_DOUBLES,
-                    dblMoveIndex,
-                    move,
-                    kingHasMoved,
-                    rookQSide,
-                    rookKSide,
-                )
-            else:
-                board, dblMoveIndex, result = turnBlock(
-                    c,
-                    board,
-                    audit,
-                    PAWN_DOUBLES,
-                    dblMoveIndex,
-                    move[0][1],
-                    kingHasMoved,
-                    rookQSide,
-                    rookKSide,
-                )
-            if result == "checkmate" or result == "stalemate":
-                Running = False
-                break
-            elif result == "stalemate":
-                Running = False
-                break
-            else:
-                # gameTurns(turnMoves, turnNumber, c, move[0])
-                # print(turnMoves[-1])
-                if not kingHasMoved[c]:
-                    if not (rookKSide[c] and rookQSide[c]):
-                        kingHasMoved[c] = pieceHasMoved("k", c, board)
-                        if not rookQSide[c]:
-                            rookQSide[c] = pieceHasMoved("r", c, board, "q")
-                        if not rookKSide[c]:
-                            rookKSide[c] = pieceHasMoved("r", c, board, "k")
-
-                turnNumber = turnIncreaser(c, turnNumber)
-                c = alternateColor(c)
-    if Break:
-        print("Game Ended (stopped)")
-    else:
-        displayBoard(board, whiteOnTop)
-        print(f"Game Over. {FORMAL_COLORS[c]} Wins by Checkmate!")
-    playagain = input("Would you like to play again? Y/N \n")
-    if playagain == "Y":
-        gameLoop()
-    else:
-        print("See You Next Time!")
-        return
 
 
 def randomChoice(moves):
@@ -854,13 +756,13 @@ def machineTurn(selectionMethod, color, board, audit, dblIndex):
 
 
 def pieceHasMoved(piece, c, boardState, side=None):
-    startBoard = bit_initialise(STARTING_POSITIONS)
+    startBoard = START_BOARD
     if c == "w":
         piece = piece.upper()
     if side != None:
         if boardSide(boardState, piece, side) != boardSide(startBoard, piece, side):
             return True
-    if boardState[piece] != bit_initialise(STARTING_POSITIONS)[piece]:
+    if boardState[piece] != startBoard[piece]:
         return True
     return False
 
@@ -973,3 +875,162 @@ def boardSide(board, piece, side):
             if i % 8 == 0:
                 string += board[piece][i - 1]
     return string
+
+
+import cProfile
+import pstats
+
+
+if __name__ == "__main__":
+    # Run your main function with cProfile
+    cProfile.run("gameLoop()", "profile_stats")
+
+    # Create a Stats object from the profiling results
+    stats = pstats.Stats("profile_stats")
+
+    # Optionally, you can sort the results by various criteria
+    stats.sort_stats("cumulative")  # Sort by cumulative time
+
+    # Print the profiling results
+
+    stats.print_stats()
+
+
+
+
+
+
+#####
+
+def gameLoop():
+    Running = True
+    (
+        kingHasMoved,
+        rookQSide,
+        rookKSide,
+        turnMoves,
+        turnNumber,
+        c,
+        board,
+        dblMoveIndex,
+        whiteOnTop,
+        audit,
+        Break,
+    ) = (
+        {"w": False, "b": False},
+        {"w": False, "b": False},
+        {"w": False, "b": False},
+        [],
+        1,
+        "w",
+        bit_init(),
+        None,
+        False,
+        False,
+        False,
+    )
+    config = gameConfig()
+    while Running:
+        print(f"Turn {turnNumber} | {FORMAL_COLORS[c]} to move")
+        castle = None
+        if config[0]:
+            availableMovesPrinted(
+                c, board, audit, dblMoveIndex, kingHasMoved, rookQSide, rookKSide
+            )
+        if config[1]:
+            displayBoard(board, whiteOnTop)
+        if config[2]:
+            previousMovesPrinted(turnMoves)
+        moveReady = False
+        while not moveReady:
+            act = takeAction(
+                c,
+                board,
+                turnMoves,
+                audit,
+                dblMoveIndex,
+                kingHasMoved,
+                rookQSide,
+                rookKSide,
+            )
+            if act == "end":
+                Running, Break = False, True
+                break
+            elif act == "move-ready":
+                moveReady = True
+                break
+        if moveReady:
+            moveAllowed = False
+            while not moveAllowed:
+                move = inputMove(
+                    c, board, dblMoveIndex, audit, kingHasMoved, rookQSide, rookKSide
+                )
+                if move == "back":
+                    moveAllowed = True
+                    break
+                if move == "O-O":
+                    castle = castleMove(board, c, "k", dblMoveIndex)
+                elif move == "O-O-O":
+                    castle = castleMove(board, c, "q", dblMoveIndex)
+                if move[1] == False:
+                    print(ERROR_MESSAGE["move_unavailable"])
+                elif move[1] == True:
+                    moveAllowed = True
+        if move != "back":
+            if not Running:
+                break
+            if castle != None:
+                board, dblMoveIndex, result = turnBlock(
+                    c,
+                    board,
+                    audit,
+                    PAWN_DOUBLES,
+                    dblMoveIndex,
+                    move,
+                    kingHasMoved,
+                    rookQSide,
+                    rookKSide,
+                )
+            else:
+                board, dblMoveIndex, result = turnBlock(
+                    c,
+                    board,
+                    audit,
+                    PAWN_DOUBLES,
+                    dblMoveIndex,
+                    move[0][1],
+                    kingHasMoved,
+                    rookQSide,
+                    rookKSide,
+                )
+            if result == "checkmate" or result == "stalemate":
+                Running = False
+                break
+            elif result == "stalemate":
+                Running = False
+                break
+            else:
+                # gameTurns(turnMoves, turnNumber, c, move[0])
+                # print(turnMoves[-1])
+                if not kingHasMoved[c]:
+                    if not (rookKSide[c] and rookQSide[c]):
+                        kingHasMoved[c] = pieceHasMoved("k", c, board)
+                        if not rookQSide[c]:
+                            rookQSide[c] = pieceHasMoved("r", c, board, "q")
+                        if not rookKSide[c]:
+                            rookKSide[c] = pieceHasMoved("r", c, board, "k")
+
+                turnNumber = turnIncreaser(c, turnNumber)
+                c = alternateColor(c)
+    if Break:
+        print("Game Ended (stopped)")
+    else:
+        displayBoard(board, whiteOnTop)
+        print(f"Game Over. {FORMAL_COLORS[c]} Wins by Checkmate!")
+    playagain = input("Would you like to play again? Y/N \n")
+    if playagain == "Y":
+        gameLoop()
+    else:
+        print("See You Next Time!")
+        return
+##########
