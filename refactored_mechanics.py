@@ -1,113 +1,50 @@
-import random
 import copy
 import initial_vars as var
 
-(
-    COLORED_PIECES,
-    PAWN_DOUBLES,
-    MOVEMENTS,
-    STARTING_POSITIONS,
-    ERROR_MESSAGE,
-    COLORS,
-    FORMAL,
-    LETTERS,
-    PIECE_TYPES,
-    FORMAL_COLORS,
-    INIT_COLOR,
-    QSIDE_KSIDE,
-    START_BOARD,
-    INDEX_MOVES,
-    WHITE_PIECES,
-    BLACK_PIECES,
-) = (
-    var.coloredPieces,
-    var.dblMoves,
-    var.movements,
-    var.startingPositions,
-    var.error_messages,
-    var.colors,
-    var.formals,
-    var.letters,
-    var.piece_types,
-    var.formalColors,
-    var.initial_color,
-    var.startingSideIndices,
-    var.starting_bits,
-    var.indexMoves,
-    var.white_pieces,
-    var.black_pieces,
-)
+COLORED_PIECES,PAWN_DOUBLES,MOVEMENTS,STARTING_POSITIONS,ERROR_MESSAGE,COLORS,FORMAL,LETTERS,PIECE_TYPES,FORMAL_COLORS,INIT_COLOR,QSIDE_KSIDE,START_BOARD,INDEX_MOVES,WHITE_PIECES,BLACK_PIECES = var.coloredPieces, var.dblMoves, var.movements, var.startingPositions, var.error_messages, var.colors, var.formals, var.letters, var.piece_types, var.formalColors, var.initial_color, var.startingSideIndices, var.starting_bits, var.indexMoves, var.white_pieces, var.black_pieces
 
 
 def index_filerank(index):
     tup = indexToTuple(index)
     return chr(tup[1] + ord("a")) + str(tup[0] + 1)
-
-
 def get_newPos(position, move):
     return position + move
-
-
 def newLine():
     print("\n - - - - - - - - - - - - - - - - - - - - -\n")
-
-
 def filerank_index(filerank):
     return int(bitIndex((int(filerank[1]) - 1, ord(filerank[0]) - ord("a"))))
-
-
 def previousMovesPrinted(turnMoves):
     (print(turnmove) for turnmove in turnMoves)
-
-
-def bit_init():
-    return START_BOARD.copy()
-
-
 def bitIndex(tuple):
     index = tuple[0] * 8 + tuple[1]
     return index
-
-
 def indexToTuple(index):
     row = index // 8
     col = index % 8
     return row, col
-
-
 def indexToPos(bin):
     indices = []
     for i in range(64):
         if bin[i] == "1":
             indices.append(i)
     return indices
-
-
 def changeBit(b, i, bool):
     if bool == True:
         b = b[:i] + "1" + b[i + 1 :]
     elif bool == False:
         b = b[:i] + "0" + b[i + 1 :]
     return b
-
-
 def onBoard(index):
     if ((index // 8) in range(8)) and ((index % 8) in range(8)):
         return True
     return False
-
-
 def pieceInIndex(board, index):
     for piece, binary in board.items():
         if (binary[index]) == "1":
             return piece
     return None
-
-
 def bit_init():
     return START_BOARD.copy()
-
-
 def genEdges():
     edges = []
     for i in range(8):
@@ -117,8 +54,6 @@ def genEdges():
             elif (j == 0) or (j == 7):
                 edges.append((i, j))
     return edges
-
-
 def gameConfig():
     inp = input("Show available Moves by default? Y/N\n")
     disp = input("(Recommended) Display Board after move? Y/N\n")
@@ -136,8 +71,6 @@ def gameConfig():
     else:
         defaultTurnsShow = False
     return defaultMoveShow, defaultDispShow, defaultTurnsShow
-
-
 class Board:
     def __init__(self, config, board=None):
         if board == None:
@@ -174,17 +107,14 @@ class Board:
         self.kingCastle, self.queenCastle = False, False
         self.all = self.allMoves()
         self.inp = None
-
     def setPiece(self, piece):
         return COLORED_PIECES[self.c][piece]
-
     def alternateColor(color):
         if color == COLORS[0]:
             return COLORS[1]
 
         elif color == COLORS[1]:
             return COLORS[0]
-
     def colorBoards(self):
         active, inactive = {}, {}
         for piece in self.board:
@@ -199,19 +129,16 @@ class Board:
                 else:
                     inactive[piece] = self.board[piece]
         return active, inactive
-
     def identifyKing(self):
         if self.c == "w":
             return "K"
         else:
             return "k"
-
     def activePawn(self):
         if self.c == "w":
             return "P"
         else:
             return "p"
-
     def pawn_starting_double(self):
         doublesAvailable = []
         for i in range(64):
@@ -220,13 +147,11 @@ class Board:
         if len(doublesAvailable) == 0:
             self.noDoubles[self.c] = True
         return doublesAvailable
-
     def isCaptured(self, move):
         for opp in self.inactive:
             if self.inactive[opp][move] == "1":
                 return opp
         return False
-
     def display(self):
         empty = "-"
         string = ""
@@ -297,7 +222,6 @@ class Board:
                 print(r)
             print(sepLine)
             print(string)
-
     def preMove(self):
         print(f"Turn {self.turnNumber} | {FORMAL_COLORS[self.c]} to move")
         if self.config[0]:
@@ -317,7 +241,6 @@ class Board:
                 self.move = move
                 moveReady = True
                 break
-
     def qualifyPieceInput(self, act):
         if len(act) == 2:
             return self.pawn, filerank_index(act.lower())
@@ -327,7 +250,6 @@ class Board:
             else:
                 p = act[0].lower()
             return p, filerank_index((act[1].lower() + act[2]))
-
     def file_rank_compile(self, act):
         if (act == "O-O") and (act in self.all):
             return "O-O"
@@ -344,7 +266,6 @@ class Board:
                     if (mv == move[1][1]) and (move[0] == p):
                         return move
             return None
-
     def printAvailableMoves(self):
         pass
         allMoves = self.all
@@ -360,10 +281,8 @@ class Board:
             string += " | "
         string += mvs[-1]
         return string
-
     def printPrevMoves(self):
         (print(turnmove) for turnmove in self.turnMoves)
-
     def takeAction(self):
         inp = input(
             "- - - - - GameOptions - - - - - \n|| Previous Moves [P] || Available Moves [A] || Stop Game [S] ||\n|| Make a Piece-Square Move [O-O : King-Side Castle | O-O-O : Queen-side Castle] ||\n|| Action ||>> "
@@ -384,7 +303,6 @@ class Board:
             return
         else:
             self.input = inp
-
     def allMoves(self):
         """
         Returns 2 lists: Non-capture moves, and Capture moves for current board conditions.
@@ -401,7 +319,6 @@ class Board:
         if self.kingCastle:
             moves[0].append("O-O")
         return Moves
-
     def boardAfterMove(self, piece, move):
         # move is one of the tuples in lists provided by
         newBoard = copy.deepcopy(self.board)
@@ -432,7 +349,6 @@ class Board:
             if not check:
                 capture2.append(move)
         return legal2, capture2
-
     def boardSide(self, piece, side):
         string = ""
         if side == "q":
@@ -444,7 +360,6 @@ class Board:
                 if i % 8 == 0:
                     string += self.board[piece][i - 1]
         return string
-
     def pieceHasMoved(self, piece, side=None):
         startBoard = START_BOARD
         if self.c == "w":
@@ -455,14 +370,12 @@ class Board:
         if self.board[piece] != startBoard[piece]:
             return True
         return False
-
     def bit_to_indices(self, piece):
         indices = []
         for i in range(64):
             if self.board[piece][i] == "1":
                 indices.append(i)
         return indices
-
     def isMate(self):
         moves = self.allMoves()
         for i in range(2):
@@ -472,7 +385,6 @@ class Board:
             return "checkmate"
         else:
             return "stalemate"
-
     def boardTurn(self):
         self.affectMove()
         if self.isMate() == "checkmate":
@@ -483,7 +395,6 @@ class Board:
             self.stalemate = True
             self.running = False
             pass
-
     def moves_postBlock(self, piece, boardAfterMove=None):
         """
         returns two lists of tuples, where the tuples are (old_position, new_position).
@@ -615,7 +526,6 @@ class Board:
                             for mv in move_sect
                         ]
         return legal, captures
-
     def isThreatened(self, piece, boardAfterMove=None):
         threats = []
         if boardAfterMove != None:
@@ -636,7 +546,6 @@ class Board:
                         if self.active[piece][captures[i][1]] == "1":
                             threats.append(captures[i])
             return threats
-
     def isCheck(self, boardAfterMove=None):
         if boardAfterMove != None:
             if len(self.isThreatened(self.king, boardAfterMove)) > 0:
@@ -649,7 +558,6 @@ class Board:
                 return f"{FORMAL[self.c]} in check", self.isThreatened(self.king)
             else:
                 return False
-
     def afterTurn(self):
         self.c = self.alternateColor()
         self.active = self.colorBoards()[0]
@@ -663,10 +571,8 @@ class Board:
         self.allMoves = self.allMoves()
         if not self.noDoubles[self.c]:
             self.pawnDoubles = self.pawn_starting_double()
-
     def getIndexBySide(self, piece, side):
         return QSIDE_KSIDE[self.c][side][piece]
-
     def castlePossible(self):
         if self.kingMoved[self.c]:
             return False, False
@@ -684,7 +590,6 @@ class Board:
                 kingQueen[0] = False
         self.kingCastle = kingQueen[0]
         self.queenCastle = kingQueen[1]
-
     def castlePathClear(self, side):
         for piece in [self.bishop, self.knight]:
             if pieceInIndex(self.board, self.getIndexBySide(piece, side)) != None:
@@ -692,7 +597,6 @@ class Board:
             if self.checkDummyKing(self.getIndexBySide(piece, side)):
                 return False
         return True
-
     def checkDummyKing(self, index):
         boardCheck = self.board.copy()
         boardCheck[self.king] = 64 * "0"
@@ -700,7 +604,6 @@ class Board:
         if isCheck(self.active, boardCheck, self.dblMoveIndex):
             return False
         return True
-
     def affectMove(self):
         move = self.move
         self.dblMoveIndex = self.pawnDoubleMove_index(move)
@@ -714,12 +617,10 @@ class Board:
                 for mv in section:
                     if mv[1] == move:
                         self.board = self.boardAfterMove(move[0], move[1])
-
     def pawnDoubleMove_index(self, move):
         if (self.pawn, move) in self.pawnDoubles:
             return move[1]
         return None
-
     def castleMove(self, side):
         self.board[self.king] = changeBit(
             self.board[self.king], QSIDE_KSIDE[self.c][side][self.king], False
@@ -741,7 +642,6 @@ class Board:
             self.board[self.rook] = changeBit(
                 self.board[self.rook], QSIDE_KSIDE[self.c][side][self.rook] + 3, False
             )
-
     def afterBoard(self):
         if self.running:
             if not self.Break:
@@ -756,6 +656,5 @@ class Board:
             else:
                 self.__del__()
                 return False
-
     def __del__(self):
         print("See You Next Time!")
