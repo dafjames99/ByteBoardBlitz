@@ -77,7 +77,7 @@ class Board:
             self.board = bit_init()
         else:
             self.board = board
-        self.c = "w"
+        self.c = INIT_COLOR
         self.king = self.setPiece("King")
         self.queen = self.setPiece("Queen")
         self.pawn = self.setPiece("Pawn")
@@ -106,13 +106,12 @@ class Board:
         self.move = None
         self.kingCastle, self.queenCastle = False, False
         self.all = self.allMoves()
-        self.inp = None
+        self.input = None
     def setPiece(self, piece):
         return COLORED_PIECES[self.c][piece]
     def alternateColor(color):
         if color == COLORS[0]:
             return COLORS[1]
-
         elif color == COLORS[1]:
             return COLORS[0]
     def colorBoards(self):
@@ -233,7 +232,7 @@ class Board:
         moveReady = False
         while not moveReady:
             self.takeAction()
-            if self.input == "end":
+            if self.input == "S":
                 self.running, self.Break = False, True
                 break
             move = self.file_rank_compile(self.input)
@@ -242,7 +241,9 @@ class Board:
                 moveReady = True
                 break
     def qualifyPieceInput(self, act):
-        if len(act) == 2:
+        if len(act) == 1:
+            pass
+        elif len(act) == 2:
             return self.pawn, filerank_index(act.lower())
         else:
             if self.c == "w":
@@ -251,36 +252,35 @@ class Board:
                 p = act[0].lower()
             return p, filerank_index((act[1].lower() + act[2]))
     def file_rank_compile(self, act):
-        if (act == "O-O") and (act in self.all):
-            return "O-O"
-        elif (act == "O-O-O") and (act in self.all):
-            return "O-O-O"
-        else:
-            piece, mv = self.qualifyPieceInput(act)
-            if self.c == "w":
-                p = piece.upper()
-            elif self.c == "b":
-                p = piece.lower()
-            for i in range(2):
-                for move in self.all[i]:
-                    if (mv == move[1][1]) and (move[0] == p):
-                        return move
-            return None
+        if len(act) != 1:
+            if (act == "O-O") and (act in self.all):
+                return "O-O"
+            elif (act == "O-O-O") and (act in self.all):
+                return "O-O-O"
+            else:
+                piece, mv = self.qualifyPieceInput(act)
+                if self.c == "w":
+                    p = piece.upper()
+                elif self.c == "b":
+                    p = piece.lower()
+                for i in range(2):
+                    for move in self.all[i]:
+                        if (mv == move[1][1]) and (move[0] == p):
+                            return move
+        return None
     def printAvailableMoves(self):
-        pass
         allMoves = self.all
         mvs = []
         for i in range(2):
-            for move in allMoves[i]:
-                mvs.append(
-                    str(str(FORMAL[move[0]]) + " to " + str(index_filerank(move[1][1])))
-                )
+                for move in allMoves[i]:
+                    mvs.append(str(str(FORMAL[move[0]]) + " to " + str(index_filerank(move[1][1]))))
         string = ""
         for Move in mvs[:-1]:
             string += Move
             string += " | "
         string += mvs[-1]
         return string
+    
     def printPrevMoves(self):
         (print(turnmove) for turnmove in self.turnMoves)
     def takeAction(self):
@@ -288,21 +288,20 @@ class Board:
             "- - - - - GameOptions - - - - - \n|| Previous Moves [P] || Available Moves [A] || Stop Game [S] ||\n|| Make a Piece-Square Move [O-O : King-Side Castle | O-O-O : Queen-side Castle] ||\n|| Action ||>> "
         )
         newLine()
+        self.input = inp
         if inp == "P":
             self.printPrevMoves()
             newLine()
             return
         elif inp == "A":
-            self.printAvailableMoves()
+            print(self.printAvailableMoves())
             newLine()
             return
         elif inp == "S":
-            self.input = "end"
+            self.input = "S"
         elif inp == "D":
             self.display()
             return
-        else:
-            self.input = inp
     def allMoves(self):
         """
         Returns 2 lists: Non-capture moves, and Capture moves for current board conditions.
@@ -334,7 +333,6 @@ class Board:
             if victim != False:
                 newBoard[victim] = changeBit(newBoard[victim], move[1], False)
         return newBoard
-
     def postCheckMoves(self, piece):
         legal1, capture1 = self.moves_postBlock(piece)
         legal2, capture2 = [], []

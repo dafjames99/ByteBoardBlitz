@@ -1,6 +1,6 @@
 error_messages = {"move_unavailable": "Error: This is not a legal movement. Try again."}
 
-initial_color = []
+initial_color = 'w'
 
 letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
 formalColors = {"w": "White", "b": "Black"}
