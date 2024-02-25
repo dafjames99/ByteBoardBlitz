@@ -1,17 +1,31 @@
-from refactored_mechanics import Board
+import mechanics as mc, scenarios as sc, machine as ai
 
-# r = True
-# while r:
-#     board = Board(config=[False, True, False])
-#     while board.running:
-#         board.preMove()
-#         if (board.input != 'A') and (board.input != 'P') and (board.input != 'D'):
-#             board.boardTurn()
-#             board.afterTurn()
-#         x = board.afterBoard()
-# if not x:
-#     r = False
+SCENARIOS = sc.scenarios
 
+def player_vs_player():
+    """
+    Captures the entire Game Loop
+    """
+    r = True
+    config = mc.gameConfig()
+    while r:
+        board = mc.Board(config=config)
+        while board.running:
+            board.preMove()
+            if (board.input != 'A') and (board.input != 'P') and (board.input != 'D'):
+                board.boardTurn()
+                board.afterTurn()
+        if board.running == False:
+            board.afterBoard()
+            if board.endAll:
+                r = False
+    board.__del__()
+def static_scenario(scen):
+    scenario = SCENARIOS[scen]
+    board = mc.Board(config=[False, True, False])
+    for move in scenario:
+        board.manualMove(move)
+        board.afterTurn()
+    board.display()
+    return board
 
-board = Board(config=[False, True, False])
-print(board.printAvailableMoves())
