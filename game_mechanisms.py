@@ -15,7 +15,7 @@ import initial_vars as var
     INIT_COLOR,
     QSIDE_KSIDE,
     START_BOARD,
-    INDEX_MOVES
+    INDEX_MOVES,
 ) = (
     var.dblMoves,
     var.movements,
@@ -29,11 +29,13 @@ import initial_vars as var
     var.initial_color,
     var.startingSideIndices,
     var.starting_bits,
-    var.indexMoves
+    var.indexMoves,
 )
+
 
 def bit_init():
     return START_BOARD.copy()
+
 
 # def bit_initialise(positions):
 #     board = {}
@@ -46,14 +48,17 @@ def bit_init():
 
 # Tuple/index/Bit operations
 
+
 def bitIndex(tuple):
     index = tuple[0] * 8 + tuple[1]
     return index
+
 
 def indexToTuple(index):
     row = index // 8
     col = index % 8
     return row, col
+
 
 # def indexToPos(bin):
 #     tups = []
@@ -62,12 +67,14 @@ def indexToTuple(index):
 #             tups.append(indexToTuple(i))
 #     return tups
 
+
 def indexToPos(bin):
     indices = []
     for i in range(64):
-        if bin[i] == '1':
+        if bin[i] == "1":
             indices.append(i)
     return indices
+
 
 def changeBit(b, i, bool):
     if bool == True:
@@ -75,8 +82,6 @@ def changeBit(b, i, bool):
     elif bool == False:
         b = b[:i] + "0" + b[i + 1 :]
     return b
-
-
 
 
 # create & comprehend board
@@ -739,8 +744,6 @@ def gameConfig():
     return defaultMoveShow, defaultDispShow, defaultTurnsShow
 
 
-
-
 def randomChoice(moves):
     i = random.randint(0, len(moves) - 1)
     return moves[i]
@@ -896,11 +899,8 @@ if __name__ == "__main__":
     stats.print_stats()
 
 
-
-
-
-
 #####
+
 
 def gameLoop():
     Running = True
@@ -1033,4 +1033,6 @@ def gameLoop():
     else:
         print("See You Next Time!")
         return
+
+
 ##########
