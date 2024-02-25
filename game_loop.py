@@ -2,6 +2,7 @@ import mechanics as mc, scenarios as sc, machine as ai
 
 SCENARIOS = sc.scenarios
 
+
 def player_vs_player():
     """
     Captures the entire Game Loop
@@ -12,7 +13,7 @@ def player_vs_player():
         board = mc.Board(config=config)
         while board.running:
             board.preMove()
-            if (board.input != 'A') and (board.input != 'P') and (board.input != 'D'):
+            if (board.input != "A") and (board.input != "P") and (board.input != "D"):
                 board.boardTurn()
                 board.afterTurn()
         if board.running == False:
@@ -20,6 +21,8 @@ def player_vs_player():
             if board.endAll:
                 r = False
     board.__del__()
+
+
 def static_scenario(scen):
     scenario = SCENARIOS[scen]
     board = mc.Board(config=[False, True, False])
@@ -29,3 +32,6 @@ def static_scenario(scen):
     board.display()
     return board
 
+
+static_scenario("protections-captures-test")
+# mc.getPieceEvaluation('', board.board, board.dblMoveIndex, board.active, board.inactive)

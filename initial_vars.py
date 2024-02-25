@@ -1,4 +1,17 @@
 initial_color = 'w'
+pieceValues = {
+    "P": 1,
+    "N": 3,
+    "R": 5,
+    "B": 3,
+    "Q": 9,
+    "p": -1,
+    "n": -3,
+    "r": -5,
+    "b": -3,
+    "q": -9
+}
+
 error_messages = {
 "move_unavailable": "Error: This is not a legal movement. Try again."
 }
