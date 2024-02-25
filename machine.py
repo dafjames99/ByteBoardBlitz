@@ -1,5 +1,4 @@
-import mechanics as mc
-import initial_vars as var
+import mechanics as mc, initial_vars as var
 
 PIECE_VALUES = {
     "P": 1,
@@ -18,7 +17,6 @@ def kingLocation(board, piece):
     for i in range(64):
         if board[piece][i] == '1':
             return i
-
 def boardValue(board):
     king = ['k', 'K']
     value = 0

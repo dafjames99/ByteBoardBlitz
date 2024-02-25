@@ -1,7 +1,4 @@
-from mechanics import Board
-import mechanics as mc
-import scenarios as sc
-import machine as ai
+import mechanics as mc, scenarios as sc, machine as ai
 
 SCENARIOS = sc.scenarios
 
@@ -12,7 +9,7 @@ def player_vs_player():
     r = True
     config = mc.gameConfig()
     while r:
-        board = Board(config=config)
+        board = mc.Board(config=config)
         while board.running:
             board.preMove()
             if (board.input != 'A') and (board.input != 'P') and (board.input != 'D'):
@@ -23,10 +20,9 @@ def player_vs_player():
             if board.endAll:
                 r = False
     board.__del__()
-
 def static_scenario(scen):
     scenario = SCENARIOS[scen]
-    board = Board(config=[False, True, False])
+    board = mc.Board(config=[False, True, False])
     for move in scenario:
         board.manualMove(move)
         board.afterTurn()
