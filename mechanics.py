@@ -79,7 +79,7 @@ def getPieceEvaluation(piece, board, dblMoveIndex, active, inactive):
     --> lists: elements are tuples of 2 - piece & move-tuple (old Index, new Index)
     """
     output = [], [], [], [], []
-    canMove, canCapture, isProtecting = genBoardPossibilities(
+    canMove, canCapture, isProtecting = beforeCheckMoves(
         piece, board, dblMoveIndex, active, inactive
     )
     protectedBy, threatenedBy = isProtected(
@@ -116,6 +116,12 @@ def getActive(board, piece):
 def index_filerank(index):
     tup = indexToTuple(index)
     return chr(tup[1] + ord("a")) + str(tup[0] + 1)
+    
+def getFilerankMove(piece, move):
+    filerank = index_filerank(move[1])
+    if piece in ['P', 'p']:
+        return filerank
+    return str(piece) + str(filerank)
 
 
 def get_newPos(position, move):
@@ -218,7 +224,7 @@ def getColor(active=None, piece=None):
             return "b"
 
 
-def genBoardPossibilities(piece, board, dblMoveIndex, active, inactive):
+def beforeCheckMoves(piece, board, dblMoveIndex, active, inactive):
     """
     returns two lists of tuples, where the tuples are (old_position, new_position).
     1st list: non-capture moves
@@ -332,15 +338,19 @@ def genBoardPossibilities(piece, board, dblMoveIndex, active, inactive):
                         legal.append((position, get_newPos(position, mv)))
                         for mv in move_sect
                     ]
+    return legal, captures, protections
+
+def afterCheckMoves(piece, board, dblMoveIndex, active, inactive):
+    legal, captures = beforeCheckMoves(piece, board, dblMoveIndex, active, inactive)[:2]
     noncheck = []
+    color = getColor(piece = piece)
     for movesList in [legal, captures]:
-        nonchecksEle = []
-        for move in movesList:
-            if not disallowedCheck(color, piece, board, move, inactive):
-                nonchecksEle.append(move)
-        noncheck.append(nonchecksEle)
-        # non-checks = legals, captures
-    return noncheck[0], noncheck[1], protections
+            nonchecksEle = []
+            for move in movesList:
+                if not disallowedCheck(color, piece, board, move, inactive):
+                    nonchecksEle.append(move)
+            noncheck.append(nonchecksEle)
+    return noncheck
 
 
 def disallowedCheck(color, piece, board, move, inactive):
@@ -361,7 +371,7 @@ def pawn_starting_double(board, pawn):
 def isThreatened(piece, board, dblMoveIndex, active, inactive):
     threats = []
     for opp in inactive:
-        captures = genBoardPossibilities(opp, board, dblMoveIndex, inactive, active)[1]
+        captures = beforeCheckMoves(opp, board, dblMoveIndex, inactive, active)[1]
         if len(captures) > 0:
             for cap in captures:
                 if active[piece][cap[1]] == "1":
@@ -372,7 +382,7 @@ def isThreatened(piece, board, dblMoveIndex, active, inactive):
 def isProtected(piece, board, dblMoveIndex, active, inactive):
     protections = []
     for ally in active:
-        protects = genBoardPossibilities(ally, board, dblMoveIndex, active, inactive)[2]
+        protects = beforeCheckMoves(ally, board, dblMoveIndex, active, inactive)[2]
         if len(protects) > 0:
             for prot in protects:
                 if active[piece][prot[1]] == "1":
@@ -630,6 +640,7 @@ class Board:
                             return move
         return None
 
+
     def printAvailableMoves(self):
         allMoves = self.all
         if (len(self.all[0]) == 0) and (len(self.all[1]) == 0):
@@ -685,7 +696,7 @@ class Board:
         """
         Moves = [], []
         for piece in self.active:
-            moves = genBoardPossibilities(
+            moves = afterCheckMoves(
                 piece, self.board, self.dblMoveIndex, self.active, self.inactive
             )
             for i in range(2):

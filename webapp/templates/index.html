@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'index.css') }}">
+    <title>ByteBoardBlitz</title>
+</head>
+<body>
+    <div class="chess-board">
+        {% for row in '87654321' %}
+            <div class="chess-row">
+                {% for col in 'ABCDEFGH' %}
+                <div class="chess-square {% if boardstate[col ~ row] %}occupied{% endif %}">
+                    {% set piece_key = boardstate[col ~ row] %}
+                    {% if piece_key %}
+                        {% set piece_color = 'white' if 'white' in piece_key else 'black' %}
+                        {% set piece_type = piece_key.split('_')[0] %}
+                        <img src="{{ url_for('static', filename='piece_svg/' + piece_color + '/' + piece_type + '.svg') }}" alt="{{ piece_type }}" class="piece-svg">
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+</html>

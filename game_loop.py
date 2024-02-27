@@ -33,5 +33,27 @@ def static_scenario(scen):
     return board
 
 
-static_scenario("protections-captures-test")
+# static_scenario("protections-captures-test")
 # mc.getPieceEvaluation('', board.board, board.dblMoveIndex, board.active, board.inactive)
+
+
+def machine_vs_machine(moveFunction, runForTurns):
+    board = mc.Board(config=[False, True, False])
+    i = board.turnNumber
+    turns = []
+    while i < (runForTurns * 2) + 1:
+        captures, moves = board.all
+        machineItem = moveFunction(captures + moves)
+        board.manualMove(mc.getFilerankMove(machineItem[0], machineItem[1]))
+        turns.append(mc.getFilerankMove(machineItem[0], machineItem[1]))
+        board.afterTurn()
+        i += 1
+    board.display()
+    print(turns)
+    print(f"Checkmate? {board.checkmate}\nStalemate? {board.stalemate}")
+    return board
+
+
+# board = mc.Board(config=[False, True, False])
+# captures, moves = board.all
+# print(captures + moves)
