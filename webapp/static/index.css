@@ -82,10 +82,3 @@ body{
     justify-content: center;
     background-color: rgb(118, 66, 33);
 }
-/* 
-.piece-svg{
-    min-height: calc(100vh / 12);
-    min-width: calc(100vw / 12);
-    max-height: 75px;
-    max-width: 75px;
-} */
