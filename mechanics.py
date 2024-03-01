@@ -117,6 +117,7 @@ def index_filerank(index):
     tup = indexToTuple(index)
     return chr(tup[1] + ord("a")) + str(tup[0] + 1)
     
+
 def getFilerankMove(piece, move):
     filerank = index_filerank(move[1])
     if piece in ['P', 'p']:
@@ -224,122 +225,6 @@ def getColor(active=None, piece=None):
             return "b"
 
 
-def beforeCheckMoves(piece, board, dblMoveIndex, active, inactive):
-    """
-    returns two lists of tuples, where the tuples are (old_position, new_position).
-    1st list: non-capture moves
-    2nd list: capture moves
-
-    params::
-    piece: string, e.g. 'Q' or 'q', as in startingPositions & MOVEMENTS (Uppercase = White, Lowercase = Black)
-    boardState: the boardState dict of {piece: binary number} (binary represents position(s))
-    MOVEMENTS:  dictionary containing piece movement rules
-    audit: boolean; set to True to assess step-by-step evaluations
-    """
-    edges = EDGES
-    all_positions = bit_to_indices(piece, board)
-    legal, captures, protections = [], [], []
-    color = getColor(active)
-    for position in all_positions:
-        if piece in ["p", "P"]:
-            pawnDoubles = pawn_starting_double(board, piece)
-            dbl = False
-            fwd = []
-            forwardSquare = INDEX_MOVES[piece][0][0]
-            captureSquares = INDEX_MOVES[piece][1]
-            if dblMoveIndex != None:
-                if position not in edges:
-                    if (position + 1 == dblMoveIndex) or (position - 1 == dblMoveIndex):
-                        if piece == "P":
-                            captures.append((position, dblMoveIndex + 8, dblMoveIndex))
-                        if piece == "p":
-                            captures.append((position, dblMoveIndex - 8, dblMoveIndex))
-                else:
-                    for i in [1, -1]:
-                        if onBoard(position + i):
-                            if position + i == dblMoveIndex:
-                                if piece == "P":
-                                    captures.append(
-                                        (
-                                            position,
-                                            dblMoveIndex + 8,
-                                            dblMoveIndex,
-                                        )
-                                    )
-                                if piece == "p":
-                                    captures.append(
-                                        (
-                                            position,
-                                            dblMoveIndex - 8,
-                                            dblMoveIndex,
-                                        )
-                                    )
-
-            if position in pawnDoubles:
-                dbl = True
-                if piece == "p":
-                    fwd.append(get_newPos(position, -16))
-                elif piece == "P":
-                    fwd.append(get_newPos(position, 16))
-            fwd.append(get_newPos(position, forwardSquare))
-            cap1, cap2 = get_newPos(position, captureSquares[0]), get_newPos(
-                position, captureSquares[1]
-            )
-            if pieceInIndex(board, fwd[0]) == None:
-                if dbl:
-                    if pieceInIndex(board, fwd[1]) == None:
-                        legal.append((position, fwd[1]))
-                legal.append((position, fwd[0]))
-            for cap in [cap1, cap2]:
-                p = pieceInIndex(board, cap)
-                if p in inactive:
-                    captures.append((position, cap))
-                elif p in active:
-                    protections.append((position, cap))
-        else:
-            for move_sect in INDEX_MOVES[piece]:
-                block, capture, block, edge, offBoard = (
-                    False,
-                    False,
-                    False,
-                    False,
-                    False,
-                )
-                for i, move in enumerate(move_sect):
-                    newPos = get_newPos(position, move)
-                    if onBoard(newPos):
-                        squareCheck = pieceInIndex(board, newPos)
-                        if squareCheck != None:
-                            if squareCheck in inactive:
-                                [
-                                    legal.append((position, get_newPos(position, mv)))
-                                    for mv in move_sect[:i]
-                                ]
-                                captures.append((position, newPos))
-                                capture = True
-                                break
-                            elif squareCheck in active:
-                                [
-                                    legal.append((position, get_newPos(position, mv)))
-                                    for mv in move_sect[:i]
-                                ]
-                                protections.append((position, newPos))
-                                block = True
-                                break
-                    else:
-                        [
-                            legal.append((position, get_newPos(position, mv)))
-                            for mv in move_sect[:i]
-                        ]
-                        offBoard = True
-                        break
-                if (not block) and (not capture) and (not edge) and (not offBoard):
-                    [
-                        legal.append((position, get_newPos(position, mv)))
-                        for mv in move_sect
-                    ]
-    return legal, captures, protections
-
 def afterCheckMoves(piece, board, dblMoveIndex, active, inactive):
     legal, captures = beforeCheckMoves(piece, board, dblMoveIndex, active, inactive)[:2]
     noncheck = []
@@ -406,23 +291,6 @@ def isCaptured(move, inactive):
         if inactive[opp][move] == "1":
             return opp
     return False
-
-
-def boardAfterMove(board, piece, move, inactive):
-    # move is one of the tuples in lists provided by
-    newBoard = board.copy()
-    if len(move) == 3:
-        victim = pieceInIndex(move[2], newBoard)
-        newBoard[piece] == changeBit(newBoard[piece], move[0], False)
-        newBoard[piece] == changeBit(newBoard[piece], move[1], True)
-        newBoard[victim] == changeBit(newBoard[victim], move[2], False)
-    else:
-        victim = isCaptured(move[1], inactive)
-        newBoard[piece] = changeBit(newBoard[piece], move[0], False)
-        newBoard[piece] = changeBit(newBoard[piece], move[1], True)
-        if victim != False:
-            newBoard[victim] = changeBit(newBoard[victim], move[1], False)
-    return newBoard
 
 
 def colorBoards(board, color):
@@ -907,3 +775,143 @@ class Board:
             if i in oppositeEdge:
                 pawnOpposites.append(i)
         return pawnOpposites
+
+    @classmethod
+    def projectBoard(self):
+        pass
+        
+
+def boardAfterMove(board, piece, move, inactive):
+    # move is one of the tuples in lists provided by
+    newBoard = board.copy()
+    if len(move) == 3:
+        victim = pieceInIndex(move[2], newBoard)
+        newBoard[piece] == changeBit(newBoard[piece], move[0], False)
+        newBoard[piece] == changeBit(newBoard[piece], move[1], True)
+        newBoard[victim] == changeBit(newBoard[victim], move[2], False)
+    else:
+        victim = isCaptured(move[1], inactive)
+        newBoard[piece] = changeBit(newBoard[piece], move[0], False)
+        newBoard[piece] = changeBit(newBoard[piece], move[1], True)
+        if victim != False:
+            newBoard[victim] = changeBit(newBoard[victim], move[1], False)
+    return newBoard
+
+
+
+def beforeCheckMoves(piece, board, dblMoveIndex, active, inactive):
+    """
+    returns two lists of tuples, where the tuples are (old_position, new_position).
+    1st list: non-capture moves
+    2nd list: capture moves
+
+    params::
+    piece: string, e.g. 'Q' or 'q', as in startingPositions & MOVEMENTS (Uppercase = White, Lowercase = Black)
+    boardState: the boardState dict of {piece: binary number} (binary represents position(s))
+    MOVEMENTS:  dictionary containing piece movement rules
+    audit: boolean; set to True to assess step-by-step evaluations
+    """
+    edges = EDGES
+    all_positions = bit_to_indices(piece, board)
+    legal, captures, protections = [], [], []
+    color = getColor(active)
+    for position in all_positions:
+        if piece in ["p", "P"]:
+            pawnDoubles = pawn_starting_double(board, piece)
+            dbl = False
+            fwd = []
+            forwardSquare = INDEX_MOVES[piece][0][0]
+            captureSquares = INDEX_MOVES[piece][1]
+            if dblMoveIndex != None:
+                if position not in edges:
+                    if (position + 1 == dblMoveIndex) or (position - 1 == dblMoveIndex):
+                        if piece == "P":
+                            captures.append((position, dblMoveIndex + 8, dblMoveIndex))
+                        if piece == "p":
+                            captures.append((position, dblMoveIndex - 8, dblMoveIndex))
+                else:
+                    for i in [1, -1]:
+                        if onBoard(position + i):
+                            if position + i == dblMoveIndex:
+                                if piece == "P":
+                                    captures.append(
+                                        (
+                                            position,
+                                            dblMoveIndex + 8,
+                                            dblMoveIndex,
+                                        )
+                                    )
+                                if piece == "p":
+                                    captures.append(
+                                        (
+                                            position,
+                                            dblMoveIndex - 8,
+                                            dblMoveIndex,
+                                        )
+                                    )
+
+            if position in pawnDoubles:
+                dbl = True
+                if piece == "p":
+                    fwd.append(get_newPos(position, -16))
+                elif piece == "P":
+                    fwd.append(get_newPos(position, 16))
+            fwd.append(get_newPos(position, forwardSquare))
+            cap1, cap2 = get_newPos(position, captureSquares[0]), get_newPos(
+                position, captureSquares[1]
+            )
+            if pieceInIndex(board, fwd[0]) == None:
+                if dbl:
+                    if pieceInIndex(board, fwd[1]) == None:
+                        legal.append((position, fwd[1]))
+                legal.append((position, fwd[0]))
+            for cap in [cap1, cap2]:
+                p = pieceInIndex(board, cap)
+                if p in inactive:
+                    captures.append((position, cap))
+                elif p in active:
+                    protections.append((position, cap))
+        else:
+            for move_sect in INDEX_MOVES[piece]:
+                block, capture, block, edge, offBoard = (
+                    False,
+                    False,
+                    False,
+                    False,
+                    False,
+                )
+                for i, move in enumerate(move_sect):
+                    newPos = get_newPos(position, move)
+                    if onBoard(newPos):
+                        squareCheck = pieceInIndex(board, newPos)
+                        if squareCheck != None:
+                            if squareCheck in inactive:
+                                [
+                                    legal.append((position, get_newPos(position, mv)))
+                                    for mv in move_sect[:i]
+                                ]
+                                captures.append((position, newPos))
+                                capture = True
+                                break
+                            elif squareCheck in active:
+                                [
+                                    legal.append((position, get_newPos(position, mv)))
+                                    for mv in move_sect[:i]
+                                ]
+                                protections.append((position, newPos))
+                                block = True
+                                break
+                    else:
+                        [
+                            legal.append((position, get_newPos(position, mv)))
+                            for mv in move_sect[:i]
+                        ]
+                        offBoard = True
+                        break
+                if (not block) and (not capture) and (not edge) and (not offBoard):
+                    [
+                        legal.append((position, get_newPos(position, mv)))
+                        for mv in move_sect
+                    ]
+    return legal, captures, protections
+       

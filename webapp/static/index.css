@@ -1,4 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap');
+
 :root{
+    font-family: "Abril Fatface", serif;
+    font-weight: 400;
+    font-style: normal;
     --brown-square: rgb(188, 110, 20);
     --white-square: rgb(255, 236, 207);
     --page-background: rgba(178, 192, 250, 0.609);
@@ -11,19 +16,83 @@ html{
     background: var(--page-background);
 }
 
+.chess-square{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+.chess-board > div:nth-child(even):not(.immutable){
+    background-color: rgb(211, 111, 39);    
+}
+.chess-board > div:nth-child(odd):not(.immutable){
+    background-color: rgb(222, 222, 222);    
+}
+
+.immutable{
+    border: none;
+    font-weight: 200;
+    font-size: 1.4rem;
+    color: white;
+}
+
+
+#file{
+    position: relative;
+    padding: none;
+    width: 100%;
+    /* left: 16px; */
+    justify-content: space-evenly;
+    
+}
+
+#rankList{
+    flex-direction: column;
+    height: 100%;
+}
+
 body{
     height: 100vh;
     width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    margin: 0px;
+}
+
+body *{
+    /* border: 1px red solid; */
+    /* background-color: aliceblue; */
+    /* padding: 5px; */
+
 }
 
 .chess-board{
-    display: flex;
+    display: grid;
     flex-direction: column;
-    border: 1px red solid;
-    width: 50%;
-    margin-left: 25%;
+    padding-top: 25px;
+    padding-right: 25px;
+    /* border-radius: 20px; */
+    grid-template-columns: 1fr repeat(8, 1.5fr);
+    grid-template-rows: repeat(8, 1.5fr) 1fr;
+    margin: 5px;
 }
 
-.chess-row{
+.board-container{
+    box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
     display: flex;
+    justify-content: center;
+    background-color: rgb(118, 66, 33);
 }
+/* 
+.piece-svg{
+    min-height: calc(100vh / 12);
+    min-width: calc(100vw / 12);
+    max-height: 75px;
+    max-width: 75px;
+} */
