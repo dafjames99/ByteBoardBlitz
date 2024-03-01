@@ -64,13 +64,6 @@ body{
     margin: 0px;
 }
 
-body *{
-    /* border: 1px red solid; */
-    /* background-color: aliceblue; */
-    /* padding: 5px; */
-
-}
-
 .chess-board{
     display: grid;
     flex-direction: column;
