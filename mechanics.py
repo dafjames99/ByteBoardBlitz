@@ -798,7 +798,6 @@ def boardAfterMove(board, piece, move, inactive):
     return newBoard
 
 
-
 def beforeCheckMoves(piece, board, dblMoveIndex, active, inactive):
     """
     returns two lists of tuples, where the tuples are (old_position, new_position).

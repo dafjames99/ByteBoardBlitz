@@ -9,6 +9,7 @@
     --page-background: rgba(178, 192, 250, 0.609);
     padding: 0px;
     margin: 0px;
+    --brown-color: rgb(183, 102, 44);
     
 }
 
@@ -25,7 +26,7 @@ html{
 
 
 .chess-board > div:nth-child(even):not(.immutable){
-    background-color: rgb(211, 111, 39);    
+    background-color: var(--brown-color);    
 }
 .chess-board > div:nth-child(odd):not(.immutable){
     background-color: rgb(222, 222, 222);    
@@ -72,7 +73,7 @@ body{
     /* border-radius: 20px; */
     grid-template-columns: 1fr repeat(8, 1.5fr);
     grid-template-rows: repeat(8, 1.5fr) 1fr;
-    margin: 5px;
+    margin: 0px 0px 0px 0px
 }
 
 .board-container{
@@ -80,5 +81,6 @@ body{
     border-radius: 10px;
     display: flex;
     justify-content: center;
-    background-color: rgb(118, 66, 33);
+    background-color:  var(--brown-color);
+    padding: 5px;
 }
