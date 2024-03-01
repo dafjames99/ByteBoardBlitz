@@ -1,3 +1,5 @@
+# To Do List
+
 1. Build out the visuals of Chess Web App
 2. Build Flask (or Django) JSON producer
 3. Build up Web App Functionalities
