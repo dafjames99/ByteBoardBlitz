@@ -1,5 +1,5 @@
-initial_color = "w"
-pieceValues = {
+INIT_COLOR = "w"
+PIECE_VALUES = {
     "P": 1,
     "N": 3,
     "R": 5,
@@ -12,11 +12,11 @@ pieceValues = {
     "q": -9,
 }
 
-error_messages = {"move_unavailable": "Error: This is not a legal movement. Try again."}
-letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
-formalColors = {"w": "White", "b": "Black"}
-colors = ["w", "b"]
-edges = [
+ERROR_MESSAGES = {"move_unavailable": "Error: This is not a legal movement. Try again."}
+LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"]
+FORMAL_COLORS = {"w": "White", "b": "Black"}
+COLORS = ["w", "b"]
+EDGES = [
     0,
     1,
     2,
@@ -46,7 +46,7 @@ edges = [
     62,
     63,
 ]
-startingPositions = {
+STARTING_POSITIONS = {
     "P": [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7)],
     "N": [(0, 1), (0, 6)],
     "R": [(0, 0), (0, 7)],
@@ -60,8 +60,8 @@ startingPositions = {
     "k": [(7, 4)],
     "q": [(7, 3)],
 }
-oppositeEdges = {"b": [0, 1, 2, 3, 4, 5, 6, 7], "w": [56, 57, 58, 59, 60, 61, 62, 63]}
-starting_bits = {
+OPPOSITE_EDGES = {"b": [0, 1, 2, 3, 4, 5, 6, 7], "w": [56, 57, 58, 59, 60, 61, 62, 63]}
+START_BOARD = {
     "P": "0000000011111111000000000000000000000000000000000000000000000000",
     "N": "0100001000000000000000000000000000000000000000000000000000000000",
     "R": "1000000100000000000000000000000000000000000000000000000000000000",
@@ -75,7 +75,7 @@ starting_bits = {
     "k": "0000000000000000000000000000000000000000000000000000000000001000",
     "q": "0000000000000000000000000000000000000000000000000000000000010000",
 }
-startingSideIndices = {
+QSIDE_KSIDE = {
     "w": {
         "q": {"K": 4, "Q": 3, "R": 0, "N": 1, "B": 2},
         "k": {"K": 4, "R": 7, "N": 6, "B": 5},
@@ -85,7 +85,7 @@ startingSideIndices = {
         "k": {"k": 60, "r": 63, "n": 62, "b": 61},
     },
 }
-movements = {
+MOVEMENTS = {
     "P": [[(1, 0)], [(1, -1), (1, 1)]],
     "N": [
         [(2, 1)],
@@ -173,9 +173,9 @@ movements = {
         [(1, -1)],
     ],
 }
-piece_types = ["P", "N", "R", "B", "K", "Q"]
-dblBoard = {"P": [], "p": []}
-dblMoves = [
+PIECE_TYPES = ["P", "N", "R", "B", "K", "Q"]
+DOUBLE_BOARD = {"P": [], "p": []}
+PAWN_DOUBLES = [
     ("p", (48, 32)),
     ("p", (49, 33)),
     ("p", (50, 34)),
@@ -193,7 +193,7 @@ dblMoves = [
     ("P", (14, 30)),
     ("P", (15, 31)),
 ]
-formals = {
+FORMAL = {
     "P": "Pawn",
     "N": "Knight",
     "R": "Rook",
@@ -207,7 +207,7 @@ formals = {
     "k": "King",
     "q": "Queen",
 }
-indexMoves = {
+INDEX_MOVES = {
     "P": [[8], [7, 9]],
     "N": [[17], [10], [-15], [-6], [15], [6], [-17], [-10]],
     "R": [
@@ -259,7 +259,7 @@ indexMoves = {
     ],
     "k": [[1], [-1], [8], [-8], [9], [-9], [-7], [7]],
 }
-white_pieces, black_pieces = ["K", "Q", "P", "N", "B", "R"], [
+WHITE_PIECES, BLACK_PIECES = ["K", "Q", "P", "N", "B", "R"], [
     "k",
     "q",
     "p",
@@ -267,7 +267,7 @@ white_pieces, black_pieces = ["K", "Q", "P", "N", "B", "R"], [
     "b",
     "r",
 ]
-coloredPieces = {
+COLORED_PIECES = {
     "w": {
         "Pawn": "P",
         "Queen": "Q",
@@ -286,7 +286,7 @@ coloredPieces = {
     },
 }
 
-outputFormat = {
+OUTPUT_FORMAT = {
     "P": "pawn_white",
     "N": "knight_white",
     "R": "rook_white",
@@ -300,7 +300,7 @@ outputFormat = {
     "k": "king_black",
     "q": "queen_black",
 }
-indexToFilerank = {
+INDEX_TO_FILERANK = {
     0: "a1",
     1: "b1",
     2: "c1",

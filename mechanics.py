@@ -1,46 +1,46 @@
 import copy, initial_vars as var
-
-(
-    PIECE_VALUES,
-    OPPOSITE_EDGES,
-    EDGES,
-    COLORED_PIECES,
-    PAWN_DOUBLES,
-    MOVEMENTS,
-    STARTING_POSITIONS,
-    ERROR_MESSAGE,
-    COLORS,
-    FORMAL,
-    LETTERS,
-    PIECE_TYPES,
-    FORMAL_COLORS,
-    INIT_COLOR,
-    QSIDE_KSIDE,
-    START_BOARD,
-    INDEX_MOVES,
-    WHITE_PIECES,
-    BLACK_PIECES,
-) = (
-    var.pieceValues,
-    var.oppositeEdges,
-    var.edges,
-    var.coloredPieces,
-    var.dblMoves,
-    var.movements,
-    var.startingPositions,
-    var.error_messages,
-    var.colors,
-    var.formals,
-    var.letters,
-    var.piece_types,
-    var.formalColors,
-    var.initial_color,
-    var.startingSideIndices,
-    var.starting_bits,
-    var.indexMoves,
-    var.white_pieces,
-    var.black_pieces,
-)
+from initial_vars import *
+# (
+#     PIECE_VALUES,
+#     OPPOSITE_EDGES,
+#     EDGES,
+#     COLORED_PIECES,
+#     PAWN_DOUBLES,
+#     MOVEMENTS,
+#     STARTING_POSITIONS,
+#     ERROR_MESSAGE,
+#     COLORS,
+#     FORMAL,
+#     LETTERS,
+#     PIECE_TYPES,
+#     FORMAL_COLORS,
+#     INIT_COLOR,
+#     QSIDE_KSIDE,
+#     START_BOARD,
+#     INDEX_MOVES,
+#     WHITE_PIECES,
+#     BLACK_PIECES,
+# ) = (
+#     var.pieceValues,
+#     var.oppositeEdges,
+#     var.edges,
+#     var.coloredPieces,
+#     var.dblMoves,
+#     var.movements,
+#     var.startingPositions,
+#     var.error_messages,
+#     var.colors,
+#     var.formals,
+#     var.letters,
+#     var.piece_types,
+#     var.formalColors,
+#     var.initial_color,
+#     var.startingSideIndices,
+#     var.starting_bits,
+#     var.indexMoves,
+#     var.white_pieces,
+#     var.black_pieces,
+# )
 
 
 def kingLocation(board, piece):
@@ -776,10 +776,6 @@ class Board:
                 pawnOpposites.append(i)
         return pawnOpposites
 
-    @classmethod
-    def projectBoard(self):
-        pass
-        
 
 def boardAfterMove(board, piece, move, inactive):
     # move is one of the tuples in lists provided by
