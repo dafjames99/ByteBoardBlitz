@@ -1,6 +1,5 @@
-import scenarios as sc, pstats, cProfile, ast
-
-SCENARIOS = sc.scenarios
+from scenarios import SCENARIOS
+import pstats, cProfile, ast
 
 def profile_code(function_string):
     if __name__ == "__main__":
