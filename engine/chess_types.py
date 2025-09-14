@@ -42,3 +42,8 @@ class StateDict(TypedDict):
     undo: bool
     san: str
 
+Move: TypeAlias = tuple[Piece, int | None, int | None] 
+
+MoveParam: TypeAlias = Move | Literal['K', "Q"]
+MoveType: TypeAlias =  Literal['castle', 'capture', 'enpassant', 'double_pawn'] | None
+MoveCombined: TypeAlias = tuple[MoveParam, MoveType]
